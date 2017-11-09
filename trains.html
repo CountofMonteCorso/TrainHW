@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Siberian Express</title>
+  <!-- Bootswatch Styling for Improving the Aesthetics -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.6/flatly/bootstrap.min.css">
+  <!-- Font Awesome CSS Icons (For cool glyphicons) -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <!-- Style to fix the issue of text extending past panel length -->
+
+  <!-- moment.js  -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script> 
+
+  <style>
+    .panel-body a {
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="jumbotron" style="background-color: rgb(27, 30, 36) ; color: white;">
+      <h1 class="text-center">Nothing Can Stop the Siberian Express</h1>
+      <p class="text-center">Choo choo muthafuckas!</p>
+    </div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="panel panel-primary">
+          <div class="panel-heading" style="background-color: #5EA5F6; color: white; padding: 10px;">
+             <h3 class="panel-title"><strong><i class="trainScheduleTable"></i> Current Train Schedule</strong></h3>
+        <br>
+        
+           
+          </div>
+          <!-- This main panel will hold each of the resulting articles -->
+         <div class="container">
+      
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Train Name</th>
+                <th>Destination</th>
+                <th>Frequency (min)</th>
+                <th>Next Arrival (min)</th>
+                <th>Minutes Away</th>
+              </tr>
+            </thead>
+            <tbody id="bodyName">
+               
+            </tbody>
+              
+          </table>
+</div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+          <br>
+          <!-- First panel is for handling the search parameters -->
+          <div class="panel panel-primary">
+            <div class="panel-heading" style="background-color: #5EA5F6; color: white; padding: 10px;">
+              <h3 class="panel-title"><strong><i class="addAtrain"></i>  Add Employee: </strong></h3>
+            </div>
+            <div class="panel-body">
+  
+              <form role="form">
+  
+                <div class="form-group">
+                  <label for="search">Train Name</label>
+                  <input type="text" class="form-control" id="addEmployName">
+                </div>
+  
+             
+                <div class="form-group">
+                  <label for="pwd">Destination</label>
+                  <input type="text" class="form-control" id="addRole">
+              
+                </div>
+  
+         
+                <div class="form-group">
+                  <label for="start-year">First Train Time "HH:MM" or it won't work, ding dong!</label>
+                  <input type="text" class="form-control" id="addStartDate">
+                </div>
+  
+              
+                <div class="form-group">
+                  <label for="end-year">Frequency (Every ___ min)</label>
+                  <input type="text" class="form-control" id="addRate">
+                </div>
+  
+                <!-- Here we have our final submit button -->
+                <button type="submit" style="background-color: #5EA5F6;" class="btn btn-default" id="addEmployee"><i class="fa fa-search"></i> Submit</button>
+  
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!-- Footer Region -->
+    <div class="row">
+      <div class="col-sm-12">
+        <!-- Line Break followed by closing -->
+        <hr>
+        <h5 class="text-center"><small></h5>
+      </div>
+    </div>
+  </div>
+  <!-- jQuery JS -->
+  <script src="https://code.jquery.com/jquery.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/4.6.1/firebase.js"></script>
+  
+  <script>
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyCPiRxrl1HuQa6CxovbrkmfJhBa1EGaDBk",
+        authDomain: "siberian-express.firebaseapp.com",
+        databaseURL: "https://siberian-express.firebaseio.com",
+        projectId: "siberian-express",
+        storageBucket: "",
+        messagingSenderId: "1085113987220"
+      };
+
+    firebase.initializeApp(config);
+    var database = firebase.database();
+    // Initial Variables (SET the first set IN FIREBASE FIRST)
+    // Note remember to create these same variables in Firebase!
+    var trainName = "";
+    var destination = "";
+    var frequency = 0;
+    var minutesAway = 0;
+    var firstTrain  ;
+    
+
+    // Click Button changes what is stored in firebase
+    $("#addEmployee").on("click", function() {
+      // Prevent the page from refreshing
+      event.preventDefault();
+      // Get inputs
+      trainName = $("#addEmployName").val();
+      destination = $("#addRole").val();
+      frequency = $("#addRate").val();
+      firstTrain = $("#addStartDate").val();
+      // Change what is saved in firebase
+      
+        database.ref().push({
+        trainName: trainName,
+        destination: destination,
+        frequency: frequency,
+        firstTrain: firstTrain,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP
+      });
+    
+    });
+    // Firebase is always watching for changes to the data.
+    // When changes occurs it will print them to console and html
+    database.ref().on("child_added", function(childSnapshot) {
+
+      //time after time
+      console.log(childSnapshot.val());
+      var ftrain = childSnapshot.val().firstTrain;
+      var qtrain = childSnapshot.val().trainName;
+      var freak = childSnapshot.val().frequency 
+
+      var currentTime = moment();
+      console.log("CURRENT TIME: " + moment(currentTime).format("hh:mm"));
+    
+      var firstTimeConverted = moment(parseInt(ftrain)).subtract(1, "years");
+      console.log(moment(firstTimeConverted).format("hh:mm"));
+
+      var diffTime = moment().diff(firstTimeConverted, "minutes");
+      console.log(parseInt(diffTime));
+
+      var tRemainder = parseInt(diffTime) % parseInt(freak);
+      console.log(freak);
+      console.log(parseInt(tRemainder));
+
+      var tMinutesTillTrain = parseInt(freak) - tRemainder;
+
+      var nextArrival = moment().add(tMinutesTillTrain, "m").format("hh:mm");
+      console.log(nextArrival);
+
+      // Print the initial data to the console.
+      console.log(childSnapshot.val());
+      // Log the value of the various properties
+      console.log(childSnapshot.val().trainName);
+      console.log(childSnapshot.val().destination);
+      console.log(childSnapshot.val().frequency);
+      console.log(childSnapshot.val().firstTrain);
+      console.log(tMinutesTillTrain)
+      // Change the HTML
+      $("#bodyName").append("<tr><td>" + childSnapshot.val().trainName + "<td>" + childSnapshot.val().destination
+      + "<td>" + childSnapshot.val().frequency + "<td>" + nextArrival + "<td>" + tMinutesTillTrain + "</tr>");
+
+
+
+
+
+      
+      // If any errors are experienced, log them to console.
+    }, function(errorObject) {
+      console.log("The read failed: " + errorObject.code);
+    });
+  </script>
+</body>
+</html>
